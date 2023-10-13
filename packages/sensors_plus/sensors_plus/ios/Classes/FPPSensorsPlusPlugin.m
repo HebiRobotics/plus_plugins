@@ -111,7 +111,12 @@ static void sendTriplet(Float64 x, Float64 y, Float64 z,
     [event appendBytes:&y length:sizeof(Float64)];
     [event appendBytes:&z length:sizeof(Float64)];
 
-    sink([FlutterStandardTypedData typedDataWithFloat64:event]);
+    if (sink) {
+      dispatch_async(dispatch_get_main_queue(), ^{
+        sink([FlutterStandardTypedData typedDataWithFloat64:event]);
+      });
+    }
+
   } @catch (NSException *e) {
     NSLog(@"Error: %@ %@", e, [e userInfo]);
   } @finally {
@@ -131,10 +136,14 @@ static void sendTriplet(Float64 x, Float64 y, Float64 z,
                                return;
                              }
                              if (error) {
-                               eventSink([FlutterError
-                                   errorWithCode:@"UNAVAILABLE"
-                                         message:[error localizedDescription]
-                                         details:nil]);
+                               if (sink) {
+                                 dispatch_async(dispatch_get_main_queue(), ^{
+                                   eventSink([FlutterError
+                                       errorWithCode:@"UNAVAILABLE"
+                                             message:[error localizedDescription]
+                                             details:nil]);
+                                 });
+                               }
                                return;
                              }
                              // Multiply by gravity, and adjust sign values to
@@ -171,10 +180,14 @@ static void sendTriplet(Float64 x, Float64 y, Float64 z,
                               return;
                             }
                             if (error) {
-                              eventSink([FlutterError
-                                  errorWithCode:@"UNAVAILABLE"
-                                        message:[error localizedDescription]
-                                        details:nil]);
+                              if (eventSink) {
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                  eventSink([FlutterError
+                                      errorWithCode:@"UNAVAILABLE"
+                                            message:[error localizedDescription]
+                                            details:nil]);
+                                });
+                              }
                               return;
                             }
                             // Multiply by gravity, and adjust sign values to
@@ -210,10 +223,14 @@ static void sendTriplet(Float64 x, Float64 y, Float64 z,
                       return;
                     }
                     if (error) {
-                      eventSink([FlutterError
-                          errorWithCode:@"UNAVAILABLE"
-                                message:[error localizedDescription]
-                                details:nil]);
+                      if (eventSink) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                          eventSink([FlutterError
+                              errorWithCode:@"UNAVAILABLE"
+                                    message:[error localizedDescription]
+                                    details:nil]);
+                        });
+                      }
                       return;
                     }
                     CMRotationRate rotationRate = gyroData.rotationRate;
@@ -256,12 +273,16 @@ static void sendTriplet(Float64 x, Float64 y, Float64 z,
                                           return;
                                         }
                                         if (error) {
-                                          eventSink([FlutterError
-                                              errorWithCode:@"UNAVAILABLE"
-                                                    message:
-                                                        [error
-                                                            localizedDescription]
-                                                    details:nil]);
+                                          if (eventSink) {
+                                            dispatch_async(dispatch_get_main_queue(), ^{
+                                              eventSink([FlutterError
+                                                  errorWithCode:@"UNAVAILABLE"
+                                                        message:
+                                                            [error
+                                                                localizedDescription]
+                                                        details:nil]);
+                                            });
+                                          }
                                           return;
                                         }
                                         // The `magneticField` is a
