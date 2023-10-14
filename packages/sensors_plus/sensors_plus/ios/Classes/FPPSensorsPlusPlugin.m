@@ -136,7 +136,7 @@ static void sendTriplet(Float64 x, Float64 y, Float64 z,
                                return;
                              }
                              if (error) {
-                               if (sink) {
+                               if (eventSink) {
                                  dispatch_async(dispatch_get_main_queue(), ^{
                                    eventSink([FlutterError
                                        errorWithCode:@"UNAVAILABLE"
